@@ -1,51 +1,69 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Inject,
-  Param,
-  Post,
-  Query,
+	Body,
+	Controller,
+	Delete,
+	Get,
+	Inject,
+	Param,
+	Post,
+	Put,
+	Query,
 } from '@nestjs/common';
-import { NoteCreateDTO } from './dto/request';
-import { DI_DICTIONARY_SERVICE, DI_NOTE_SERVICE } from 'config';
-import { DictionaryService, NoteService } from 'src/service';
-import { NoteIdDTO } from './dto/request/note-id.dto';
+import { NoteUpsertDTO, NoteTitleDTO, NoteReadDTO } from './dto';
+import { DI_NOTE_SERVICE } from 'config';
+import { NoteService } from 'src/service';
+import { NoteModel } from '../model';
+import { InjectMapper } from '@automapper/nestjs';
+import { Mapper } from '@automapper/core';
 
 @Controller('note')
 export class NoteController {
-  public constructor(
-    @Inject(DI_NOTE_SERVICE) private noteService: NoteService,
-    @Inject(DI_DICTIONARY_SERVICE) private dictionaryService: DictionaryService,
-  ) {}
+	public constructor(
+		@InjectMapper() private readonly mapper: Mapper,
+		@Inject(DI_NOTE_SERVICE) private noteService: NoteService,
+	) {}
 
-  @HttpCode(HttpStatus.CREATED)
-  @Get(':name/:surname')
-  public getHello(
-    @Param('name') name: string,
-    @Param('surname') surname: string,
-  ): string {
-    return `Hello ${name} ${surname}`;
-  }
+	@Post()
+	public createNote(@Body() noteUpsertDTO: NoteUpsertDTO): NoteReadDTO {
+		const note: NoteModel = this.mapper.map(
+			noteUpsertDTO,
+			NoteUpsertDTO,
+			NoteModel,
+		);
+		const createdNote: NoteModel = this.noteService.createNote(note);
+		return this.mapper.map(createdNote, NoteModel, NoteReadDTO);
+	}
 
-  @Get('idade')
-  public getPessoa(
-    @Query('idade') idade: number,
-    @Query('nome') nome: string,
-  ): string {
-    return `Vc, ${nome} tem ${idade} anos`;
-  }
+	@Get()
+	public readNoteListByTitle(
+		@Query() noteTitleDTO: NoteTitleDTO,
+	): NoteTitleDTO[] {
+		const notes: NoteModel[] = this.noteService.searchTitleList(
+			noteTitleDTO.title,
+		);
+		return this.mapper.mapArray(notes, NoteModel, NoteTitleDTO);
+	}
 
-  @Post('exemplo-body')
-  public exemploBody(@Body() body: NoteCreateDTO): string {
-    return `O corpo da requisição é: ${JSON.stringify(body)}`;
-  }
+	@Get('/content/:title')
+	public readNoteContent(@Param() noteTitleDTO: NoteTitleDTO): NoteReadDTO {
+		const note: NoteModel = this.noteService.getNoteContent(noteTitleDTO.title);
+		return this.mapper.map(note, NoteModel, NoteReadDTO);
+	}
 
-  @Delete(':id')
-  public deleteNote(@Param() noteIdDTO: NoteIdDTO): void {
-    this.noteService.deleteNote(noteIdDTO.id);
-  }
+	@Put()
+	public updateNote(@Body() noteUpsertDTO: NoteUpsertDTO): NoteReadDTO {
+		const note: NoteModel = this.mapper.map(
+			noteUpsertDTO,
+			NoteUpsertDTO,
+			NoteModel,
+		);
+		const updatedNote: NoteModel = this.noteService.updateNote(note);
+
+		return this.mapper.map(updatedNote, NoteModel, NoteReadDTO);
+	}
+
+	@Delete(':title')
+	public deleteNote(@Param() noteTitleDTO: NoteTitleDTO): void {
+		this.noteService.deleteNote(noteTitleDTO.title);
+	}
 }
