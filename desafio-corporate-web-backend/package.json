@@ -7,8 +7,9 @@
 	"license": "UNLICENSED",
 	"scripts": {
 		"prebuild": "rimraf dist",
-		"build:prisma": "prisma migrate deploy && prisma generate",
-		"build": "npm run prebuild && npm run build:prisma && nest build",
+		"build:prisma": "prisma generate",
+		"build:nest": "nest build",
+		"build": "npm run prebuild && npm run build:prisma && npm run build:nest",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start": "nest start",
 		"start:dev": "nest start --watch",

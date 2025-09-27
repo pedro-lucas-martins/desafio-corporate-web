@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  database:
+    image: postgres:13
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: notedb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - desafio-c-web
+
+  backend:
+    build:
+      context: ./desafio-corporate-web-backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://postgres:123@database:5432/notedb
+      NODE_ENV: production
+    depends_on:
+      - database
+    networks:
+      - desafio-c-web
+
+volumes:
+  postgres_data:
+
+networks:
+  desafio-c-web:
+    driver: bridge
