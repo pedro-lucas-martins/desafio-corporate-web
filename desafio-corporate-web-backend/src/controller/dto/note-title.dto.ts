@@ -1,8 +1,16 @@
 import { AutoMap } from '@automapper/classes';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class NoteTitleDTO {
+	@ApiProperty({
+		description: "Titulo da anotação",
+		required: true,
+		type: String,
+		minimum: 1,
+		maximum: 80
+	})
 	@AutoMap()
 	@MaxLength(80)
 	@IsNotEmpty()

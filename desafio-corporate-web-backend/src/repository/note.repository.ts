@@ -1,13 +1,10 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { PrismaService } from "../infrastructure";
-import { DI_PRISMA_SERVICE } from "../../config";
-import { NoteModel } from "../model";
-import { Note } from "@prisma/client";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../infrastructure';
+import { NoteModel } from '../model';
 
 @Injectable()
 export class NoteRepository {
-	constructor(@Inject(DI_PRISMA_SERVICE) private prismaService: PrismaService) {
-	}
+	constructor(private prismaService: PrismaService) {}
 
 	public async findNotesByTitle(title: string): Promise<NoteModel[]> {
 		const allNotes = await this.prismaService.note.findMany({
@@ -23,9 +20,9 @@ export class NoteRepository {
 
 	public async upsertNote(note: NoteModel): Promise<NoteModel> {
 		const createdNote = await this.prismaService.note.upsert({
-			where: {title: note.title},
-			update: {content: note.content},
-			create: {title: note.title!, content: note.content!}
+			where: { title: note.title },
+			update: { content: note.content },
+			create: { title: note.title!, content: note.content! },
 		});
 		return createdNote;
 	}
@@ -45,5 +42,21 @@ export class NoteRepository {
 			},
 		});
 		return note as NoteModel;
+	}
+
+	public async findUniqueNoteById(note: NoteModel): Promise<NoteModel> {
+		const searchResult = await this.prismaService.note.findUnique({
+			where: {
+				id: note.id,
+			},
+		});
+		return searchResult as NoteModel;
+	}
+
+	public async saveNote(note: NoteModel): Promise<NoteModel> {
+		return this.prismaService.note.update({
+			where: { id: note.id },
+			data: note,
+		});
 	}
 }

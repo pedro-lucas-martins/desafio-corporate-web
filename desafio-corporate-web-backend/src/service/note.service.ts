@@ -44,8 +44,6 @@ export class NoteService {
 		const searchResults: NoteModel[] =
 			await this.noteRepository.findNotesByTitle(title);
 
-		//TO DO MUDAR O RETORNO NO CONTROLLER, 204 SE ESTIVER VAZIO
-
 		return searchResults;
 	}
 
@@ -58,16 +56,23 @@ export class NoteService {
 		return searchResult;
 	}
 
-	public async updateNote(note: NoteModel): Promise<NoteModel> {
+	public async updateNote(note: NoteModel, title: string): Promise<NoteModel> {
 		const searchResult: NoteModel =
-			await this.noteRepository.findUniqueNoteByTitle(note.title);
+			await this.noteRepository.findUniqueNoteByTitle(title); // procura no bd se existe alguma nota com titulo
 
 		if (searchResult === null) {
 			throw new NotFoundException(
 				'Não foi possível atualizar, não existe anotação com o título informado',
 			);
 		}
-		const updatedNote: NoteModel = await this.noteRepository.upsertNote(note);
+
+		// Achei a nota pelo titulo... atualizo o titulo e o content da nota encontrada com o body
+		searchResult.title = note.title;
+		searchResult.content = note.content;
+
+		// Salva no bd
+		const updatedNote: NoteModel =
+			await this.noteRepository.saveNote(searchResult);
 
 		return updatedNote;
 	}
