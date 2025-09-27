@@ -1,49 +1,74 @@
-import { Injectable } from '@nestjs/common';
+import {
+	ConflictException,
+	Inject,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { NoteModel } from '../model';
-//import { NoteReadDTO } from 'src/controller/dto/response';
-//import { NoteModel } from 'src/model';
+import { DI_NOTE_REPOSITORY } from '../../config';
+import { NoteRepository } from '../repository';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class NoteService {
-	public deleteNote(title: string): void {
-		console.log(`Note with ID ${title} deleted`);
-
-		//Deletar do banco
+	public constructor(
+		@Inject(DI_NOTE_REPOSITORY) private noteRepository: NoteRepository,
+	) {}
+	public async deleteNote(title: string): Promise<void> {
+		const searchResult: NoteModel =
+			await this.noteRepository.findUniqueNoteByTitle(title);
+		if (searchResult === null) {
+			throw new NotFoundException(
+				'Não foi possível deletar, anotação não existe',
+			);
+		}
+		await this.noteRepository.removeNote(title);
 	}
 
-	public createNote(note: NoteModel): NoteModel {
-		const createdNote = new NoteModel();
-		createdNote.id = Math.floor(Math.random() * 1000) + 1;
-		createdNote.title = note.title;
-		createdNote.content = note.content;
+	public async createNote(note: NoteModel): Promise<NoteModel> {
+		const searchResult = await this.noteRepository.findUniqueNoteByTitle(
+			note.title,
+		);
+		if (searchResult !== null) {
+			throw new ConflictException(
+				'O título já existe, não foi possível criar anotação',
+			);
+		}
 
-		// Aqui vai salvar no banco depois
+		const createdNote: NoteModel = await this.noteRepository.upsertNote(note);
 
-		return note;
+		return createdNote;
 	}
 
-	public searchTitleList(title: string): NoteModel[] {
-		const notes: NoteModel[] = [];
+	public async searchTitleList(title: string): Promise<NoteModel[]> {
+		const searchResults: NoteModel[] =
+			await this.noteRepository.findNotesByTitle(title);
 
-		//Consultar do banco procurando tudo que tem title no titulo
-		//Retorno da consulta adicionado no notes
-		return notes;
+		//TO DO MUDAR O RETORNO NO CONTROLLER, 204 SE ESTIVER VAZIO
+
+		return searchResults;
 	}
 
-	public getNoteContent(title: string): NoteModel {
-		const note: NoteModel = new NoteModel();
-		//Consultar do banco procurando o titulo exato
-		//Retorno da consulta adicionado no note
-		return note;
+	public async getNoteContent(title: string): Promise<NoteModel> {
+		const searchResult: NoteModel =
+			await this.noteRepository.findUniqueNoteByTitle(title);
+		if (searchResult === null) {
+			throw new NotFoundException('Não existe anotação com o título informado');
+		}
+		return searchResult;
 	}
 
-	public updateNote(note: NoteModel): NoteModel {
-		const updatedNote = new NoteModel();
-		updatedNote.id = note.id;
-		updatedNote.title = note.title;
-		updatedNote.content = note.content;
+	public async updateNote(note: NoteModel): Promise<NoteModel> {
+		const searchResult: NoteModel =
+			await this.noteRepository.findUniqueNoteByTitle(note.title);
 
-		//mandar pro bd
+		if (searchResult === null) {
+			throw new NotFoundException(
+				'Não foi possível atualizar, não existe anotação com o título informado',
+			);
+		}
+		const updatedNote: NoteModel = await this.noteRepository.upsertNote(note);
+
 		return updatedNote;
 	}
 }

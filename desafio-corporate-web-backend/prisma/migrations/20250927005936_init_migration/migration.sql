@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "public"."Note" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -8,3 +8,6 @@ CREATE TABLE "public"."Note" (
 
     CONSTRAINT "Note_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Note_title_key" ON "public"."Note"("title");

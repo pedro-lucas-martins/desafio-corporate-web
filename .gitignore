@@ -105,3 +105,5 @@ dist-ssr
 *.sln
 *.sw?
 
+/desafio-corporate-web-backend/src/generated/
+

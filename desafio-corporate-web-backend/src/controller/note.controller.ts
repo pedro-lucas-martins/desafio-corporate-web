@@ -3,6 +3,8 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpException,
+	HttpStatus,
 	Inject,
 	Param,
 	Post,
@@ -24,46 +26,68 @@ export class NoteController {
 	) {}
 
 	@Post()
-	public createNote(@Body() noteUpsertDTO: NoteUpsertDTO): NoteReadDTO {
+	public async createNote(
+		@Body() noteUpsertDTO: NoteUpsertDTO,
+	): Promise<NoteReadDTO> {
 		const note: NoteModel = this.mapper.map(
 			noteUpsertDTO,
 			NoteUpsertDTO,
 			NoteModel,
 		);
-		const createdNote: NoteModel = this.noteService.createNote(note);
-		return this.mapper.map(createdNote, NoteModel, NoteReadDTO);
+		const createdNote: NoteModel = await this.noteService.createNote(note);
+		return this.mapper.mapAsync(createdNote, NoteModel, NoteReadDTO);
 	}
 
 	@Get()
-	public readNoteListByTitle(
+	public async readNoteListByTitle(
 		@Query() noteTitleDTO: NoteTitleDTO,
-	): NoteTitleDTO[] {
-		const notes: NoteModel[] = this.noteService.searchTitleList(
+	): Promise<NoteTitleDTO[]> {
+		const notes: NoteModel[] = await this.noteService.searchTitleList(
 			noteTitleDTO.title,
 		);
-		return this.mapper.mapArray(notes, NoteModel, NoteTitleDTO);
+
+		if (notes.length === 0) {
+			throw new HttpException(
+				'Não existem anotações correspondentes a pesquisa',
+				HttpStatus.NO_CONTENT,
+			);
+		}
+		return this.mapper.mapArrayAsync(notes, NoteModel, NoteTitleDTO);
 	}
 
 	@Get('/content/:title')
-	public readNoteContent(@Param() noteTitleDTO: NoteTitleDTO): NoteReadDTO {
-		const note: NoteModel = this.noteService.getNoteContent(noteTitleDTO.title);
-		return this.mapper.map(note, NoteModel, NoteReadDTO);
+	public async readNoteContent(
+		@Param() noteTitleDTO: NoteTitleDTO,
+	): Promise<NoteReadDTO> {
+		const note: NoteModel = await this.noteService.getNoteContent(
+			noteTitleDTO.title,
+		);
+		return this.mapper.mapAsync(note, NoteModel, NoteReadDTO);
 	}
 
 	@Put()
-	public updateNote(@Body() noteUpsertDTO: NoteUpsertDTO): NoteReadDTO {
+	public async updateNote(
+		@Body() noteUpsertDTO: NoteUpsertDTO,
+		//@Param() noteTitleDTO: NoteTitleDTO,
+	): Promise<NoteReadDTO> {
 		const note: NoteModel = this.mapper.map(
 			noteUpsertDTO,
 			NoteUpsertDTO,
 			NoteModel,
 		);
-		const updatedNote: NoteModel = this.noteService.updateNote(note);
+		// TO DO
+		// const title: NoteModel = this.mapper.map(
+		// 	noteTitleDTO,
+		// 	NoteTitleDTO,
+		// 	NoteModel,
+		// );
+		const updatedNote: NoteModel = await this.noteService.updateNote(note);
 
-		return this.mapper.map(updatedNote, NoteModel, NoteReadDTO);
+		return this.mapper.mapAsync(updatedNote, NoteModel, NoteReadDTO);
 	}
 
 	@Delete(':title')
-	public deleteNote(@Param() noteTitleDTO: NoteTitleDTO): void {
-		this.noteService.deleteNote(noteTitleDTO.title);
+	public async deleteNote(@Param() noteTitleDTO: NoteTitleDTO): Promise<void> {
+		await this.noteService.deleteNote(noteTitleDTO.title);
 	}
 }

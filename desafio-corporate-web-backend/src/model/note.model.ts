@@ -2,7 +2,7 @@ import { AutoMap } from '@automapper/classes';
 
 export class NoteModel {
 	@AutoMap()
-	id?: number;
+	id: number;
 
 	@AutoMap()
 	creationDate?: Date;
@@ -11,8 +11,8 @@ export class NoteModel {
 	lastModDate?: Date;
 
 	@AutoMap()
-	title?: string;
+	title: string;
 
 	@AutoMap()
-	content?: string;
+	content: string;
 }
