@@ -59,7 +59,6 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
-  const [isOnlineMode, setIsOnlineMode] = useState<boolean>(true);
 
   // Função para limpar mensagens após um tempo
   const clearMessages = (): void => {
@@ -73,25 +72,15 @@ const App: React.FC = () => {
   const fetchNotes = async (): Promise<void> => {
     setLoading(true);
     setError("");
-
     try {
-      if (isOnlineMode) {
-        const fetchedNotes = await notesApiService.getAllNotes();
-        setNotes(fetchedNotes || []);
-      } else {
-        // Modo offline com dados mockados
-        const mockNotes: NoteReadDTO[] = [];
-        setNotes(mockNotes);
-      }
+      const fetchedNotes = await notesApiService.getAllNotes();
+      setNotes(fetchedNotes || []);
     } catch (error) {
       console.error("Erro ao buscar anotações:", error);
       setError(
         "Erro ao carregar anotações. Verifique se o backend está rodando."
       );
-      //setIsOnlineMode(false);   TODO:
-      // Fallback para dados mockados
-      const mockNotes: NoteReadDTO[] = [];
-      setNotes(mockNotes);
+      setNotes([]); // Limpa as anotações em caso de erro
       clearMessages();
     } finally {
       setLoading(false);
@@ -113,41 +102,27 @@ const App: React.FC = () => {
 
     setLoading(true);
     setError("");
-
     try {
-      if (isOnlineMode) {
-        const createdNote = await notesApiService.createNote({
-          title: currentNote.title.trim(),
-          content: currentNote.content.trim(),
-        });
-
-        // Atualiza a lista local com a nova anotação
-        setNotes((prev) => [...prev, createdNote]);
-        setSuccess("Anotação criada com sucesso!");
-      } else {
-        // Modo offline
-        setNotes((prev) => [...prev, { ...currentNote }]);
-        setSuccess("Anotação criada (modo offline)");
-      }
-
+      const createdNote = await notesApiService.createNote({
+        title: currentNote.title.trim(),
+        content: currentNote.content.trim(),
+      });
+      setNotes((prev) => [...prev, createdNote]);
+      setSuccess("Anotação criada com sucesso!");
       setCurrentNote({ title: "", content: "" });
       setIsCreateDialogOpen(false);
       clearMessages();
     } catch (error) {
       console.error("Erro ao criar anotação:", error);
-      if (error instanceof Error) {
-        if (
-          error.message.includes("409") ||
-          error.message.includes("Conflict")
-        ) {
-          setError(
-            "Já existe uma anotação com esse título. Escolha outro título."
-          );
-        } else {
-          setError("Erro ao criar anotação. Tente novamente.");
-        }
+      if (
+        error instanceof Error &&
+        (error.message.includes("409") || error.message.includes("Conflict"))
+      ) {
+        setError(
+          "Já existe uma anotação com esse título. Escolha outro título."
+        );
       } else {
-        setError("Erro desconhecido ao criar anotação.");
+        setError("Erro ao criar anotação. Tente novamente.");
       }
       clearMessages();
     } finally {
@@ -162,7 +137,6 @@ const App: React.FC = () => {
       clearMessages();
       return;
     }
-
     if (!editingNote) {
       setError("Nenhuma anotação selecionada para edição");
       clearMessages();
@@ -171,51 +145,30 @@ const App: React.FC = () => {
 
     setLoading(true);
     setError("");
-
     try {
-      if (isOnlineMode) {
-        const updatedNote = await notesApiService.updateNote(
-          editingNote.title,
-          {
-            title: currentNote.title.trim(),
-            content: currentNote.content.trim(),
-          }
-        );
-
-        // Atualiza a lista local
-        setNotes((prev) =>
-          prev.map((note) =>
-            note.title === editingNote.title ? updatedNote : note
-          )
-        );
-        setSuccess("Anotação atualizada com sucesso!");
-      } else {
-        // Modo offline
-        setNotes((prev) =>
-          prev.map((note) =>
-            note.title === editingNote.title ? { ...currentNote } : note
-          )
-        );
-        setSuccess("Anotação atualizada (modo offline)");
-      }
-
+      const updatedNote = await notesApiService.updateNote(editingNote.title, {
+        title: currentNote.title.trim(),
+        content: currentNote.content.trim(),
+      });
+      setNotes((prev) =>
+        prev.map((note) =>
+          note.title === editingNote.title ? updatedNote : note
+        )
+      );
+      setSuccess("Anotação atualizada com sucesso!");
       setCurrentNote({ title: "", content: "" });
       setEditingNote(null);
       setIsEditDialogOpen(false);
       clearMessages();
     } catch (error) {
       console.error("Erro ao atualizar anotação:", error);
-      if (error instanceof Error) {
-        if (
-          error.message.includes("404") ||
-          error.message.includes("Not Found")
-        ) {
-          setError("Anotação não encontrada.");
-        } else {
-          setError("Erro ao atualizar anotação. Tente novamente.");
-        }
+      if (
+        error instanceof Error &&
+        (error.message.includes("404") || error.message.includes("Not Found"))
+      ) {
+        setError("Anotação não encontrada.");
       } else {
-        setError("Erro desconhecido ao atualizar anotação.");
+        setError("Erro ao atualizar anotação. Tente novamente.");
       }
       clearMessages();
     } finally {
@@ -227,28 +180,20 @@ const App: React.FC = () => {
   const handleDeleteNote = async (noteTitle: string): Promise<void> => {
     setLoading(true);
     setError("");
-
     try {
-      // if (isOnlineMode) {
       await notesApiService.deleteNote(noteTitle);
-      setSuccess("Anotação deletada com sucesso!");
-      // Remove da lista local
       setNotes((prev) => prev.filter((note) => note.title !== noteTitle));
+      setSuccess("Anotação deletada com sucesso!");
       clearMessages();
     } catch (error) {
       console.error("Erro ao deletar anotação:", error);
-      console.log("Erro ao deletar anotação:", error);
-      if (error instanceof Error) {
-        if (
-          error.message.includes("404") ||
-          error.message.includes("Not Found")
-        ) {
-          setError("Anotação não encontrada.");
-        } else {
-          setError("Erro ao deletar anotação. Tente novamente.");
-        }
+      if (
+        error instanceof Error &&
+        (error.message.includes("404") || error.message.includes("Not Found"))
+      ) {
+        setError("Anotação não encontrada.");
       } else {
-        setError("Erro desconhecido ao deletar anotação.");
+        setError("Erro ao deletar anotação. Tente novamente.");
       }
       clearMessages();
     } finally {
@@ -260,21 +205,17 @@ const App: React.FC = () => {
   const openEditDialog = async (note: NoteReadDTO): Promise<void> => {
     setEditingNote(note);
     setLoading(true);
-
     try {
-      if (isOnlineMode) {
-        // Busca o conteúdo completo da anotação
-        const fullNote = await notesApiService.getNoteContent(note.title);
-        setCurrentNote({ ...fullNote });
-      } else {
-        setCurrentNote({ ...note });
-      }
+      // ===== CORREÇÃO APLICADA AQUI =====
+      // Voltamos a usar note.title para buscar o conteúdo, como você queria.
+      const fullNote = await notesApiService.getNoteContent(note.title);
+      setCurrentNote({ ...fullNote });
       setIsEditDialogOpen(true);
     } catch (error) {
       console.error("Erro ao buscar conteúdo da anotação:", error);
       setError("Erro ao carregar anotação para edição.");
       clearMessages();
-      // Fallback para os dados que já temos
+      // Fallback para os dados que já temos caso a busca falhe
       setCurrentNote({ ...note });
       setIsEditDialogOpen(true);
     } finally {
@@ -283,13 +224,7 @@ const App: React.FC = () => {
   };
 
   // Função para buscar anotações por título
-  const handleSearch = async (searchValue: string): Promise<void> => {
-    //setSearchTerm(searchValue);
-
-    if (!isOnlineMode) {
-      return; // No modo offline, a busca é feita localmente via filteredNotes
-    }
-
+  const handleSearch = async (): Promise<void> => {
     if (!searchTerm.trim()) {
       fetchNotes(); // Se busca vazia, carrega todas
       return;
@@ -297,13 +232,10 @@ const App: React.FC = () => {
 
     setLoading(true);
     setError("");
-
     try {
       const searchResults = await notesApiService.searchNotesByTitle(
         searchTerm
       );
-
-      // Busca o conteúdo completo de cada resultado
       if (searchResults && searchResults.length > 0) {
         const notesPromises = searchResults.map((titleDto) =>
           notesApiService.getNoteContent(titleDto.title)
@@ -323,25 +255,6 @@ const App: React.FC = () => {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Filtrar anotações baseado na busca (para modo offline ou busca local)
-  const filteredNotes = isOnlineMode
-    ? notes
-    : notes.filter(
-        (note) =>
-          note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.content.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-  // Função para alternar entre modo online/offline
-  const toggleMode = (): void => {
-    setIsOnlineMode(!isOnlineMode);
-    setError("");
-    setSuccess("");
-    if (!isOnlineMode) {
-      fetchNotes(); // Tenta reconectar
     }
   };
 
@@ -367,24 +280,6 @@ const App: React.FC = () => {
             <div className="flex items-center gap-3">
               <StickyNote className="h-8 w-8 text-yellow-600" />
               <h1 className="text-3xl font-bold text-gray-800">Notes App</h1>
-              <div className="flex items-center gap-2 ml-4">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    isOnlineMode ? "bg-green-500" : "bg-red-500"
-                  }`}
-                ></div>
-                <span className="text-sm text-gray-600">
-                  {isOnlineMode ? "Online" : "Offline"}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleMode}
-                  className="text-xs"
-                >
-                  {isOnlineMode ? "Ir para Offline" : "Tentar Reconectar"}
-                </Button>
-              </div>
             </div>
 
             <Dialog
@@ -435,9 +330,9 @@ const App: React.FC = () => {
                       className="bg-yellow-500 hover:bg-yellow-600"
                       disabled={loading}
                     >
-                      {loading ? (
+                      {loading && (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : null}
+                      )}
                       Criar
                     </Button>
                   </div>
@@ -500,7 +395,7 @@ const App: React.FC = () => {
               Carregando anotações...
             </div>
           </div>
-        ) : filteredNotes.length === 0 ? (
+        ) : notes.length === 0 ? (
           <div className="text-center py-16">
             <StickyNote className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-600 mb-2">
@@ -516,9 +411,9 @@ const App: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredNotes.map((note, index) => (
+            {notes.map((note) => (
               <Card
-                key={`${note.title}-${index}`}
+                key={note.id} // É uma boa prática manter o ID aqui para a renderização do React
                 className="bg-white hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-400 group"
               >
                 <CardHeader className="pb-3">
@@ -568,9 +463,9 @@ const App: React.FC = () => {
                             className="bg-red-600 hover:bg-red-700"
                             disabled={loading}
                           >
-                            {loading ? (
+                            {loading && (
                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : null}
+                            )}
                             Deletar
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -616,9 +511,7 @@ const App: React.FC = () => {
                   className="bg-blue-500 hover:bg-blue-600"
                   disabled={loading}
                 >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : null}
+                  {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   Salvar
                 </Button>
               </div>
