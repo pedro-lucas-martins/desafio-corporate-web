@@ -3,6 +3,7 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpCode,
 	HttpException,
 	HttpStatus,
 	Inject,
@@ -68,11 +69,9 @@ export class NoteController {
 	})
 	@Get()
 	public async readNoteListByTitle(
-		@Query() noteTitleDTO: NoteTitleDTO,
+		@Query('title') title: string,
 	): Promise<NoteTitleDTO[]> {
-		const notes: NoteModel[] = await this.noteService.searchTitleList(
-			noteTitleDTO.title,
-		);
+		const notes: NoteModel[] = await this.noteService.searchTitleList(title);
 
 		if (notes.length === 0) {
 			throw new HttpException(
@@ -113,7 +112,7 @@ export class NoteController {
 	@Put(':title')
 	public async updateNote(
 		@Body() noteUpsertDTO: NoteUpsertDTO,
-		@Param('title') title: string, // Titulo antigo
+		@Param('title') title: string,
 	): Promise<NoteReadDTO> {
 		const note: NoteModel = this.mapper.map(
 			noteUpsertDTO,
@@ -123,7 +122,7 @@ export class NoteController {
 		const updatedNote: NoteModel = await this.noteService.updateNote(
 			note,
 			title,
-		); // manda nota nova
+		);
 
 		return this.mapper.mapAsync(updatedNote, NoteModel, NoteReadDTO);
 	}
@@ -135,6 +134,7 @@ export class NoteController {
 	@ApiOkResponse({ description: 'Anotação deletada com sucesso' })
 	@ApiOperation({ description: 'Deleta uma anotação no sistema' })
 	@UnexpectedResponses()
+	@HttpCode(HttpStatus.NO_CONTENT)
 	@Delete(':title')
 	public async deleteNote(@Param() noteTitleDTO: NoteTitleDTO): Promise<void> {
 		await this.noteService.deleteNote(noteTitleDTO.title);

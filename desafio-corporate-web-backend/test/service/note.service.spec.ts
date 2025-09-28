@@ -26,7 +26,6 @@ describe('NoteService', () => {
 				id: 0,
 			};
 
-			// Corrigindo o mock para retornar null, indicando que a nota não existe
 			noteRepository.findUniqueNoteByTitle.mockResolvedValue(
 				null as unknown as NoteModel,
 			);
@@ -99,7 +98,6 @@ describe('NoteService', () => {
 
 			const result = await noteService.updateNote(update, 'Old');
 			expect(result).toEqual(updatedNote);
-			// Corrigido para incluir 'id' na expectativa
 			expect(noteRepository.saveNote).toHaveBeenCalledWith({
 				title: 'New',
 				content: 'New content',

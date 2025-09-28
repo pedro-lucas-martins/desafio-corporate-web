@@ -17,7 +17,6 @@ describe('NoteController', () => {
 	let noteService: NoteService;
 	let mapper: Mapper;
 
-	// Mock para todas as dependências do controller
 	const noteServiceMock = {
 		createNote: jest.fn(),
 		searchTitleList: jest.fn(),
@@ -46,7 +45,6 @@ describe('NoteController', () => {
 		mapper = module.get<Mapper>(getMapperToken());
 	});
 
-	// Limpa o estado dos mocks após cada teste
 	afterEach(() => {
 		jest.clearAllMocks();
 	});

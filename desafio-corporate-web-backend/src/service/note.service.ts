@@ -7,7 +7,6 @@ import {
 import { NoteModel } from '../model';
 import { DI_NOTE_REPOSITORY } from '../../config';
 import { NoteRepository } from '../repository';
-import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class NoteService {
@@ -58,7 +57,7 @@ export class NoteService {
 
 	public async updateNote(note: NoteModel, title: string): Promise<NoteModel> {
 		const searchResult: NoteModel =
-			await this.noteRepository.findUniqueNoteByTitle(title); // procura no bd se existe alguma nota com titulo
+			await this.noteRepository.findUniqueNoteByTitle(title);
 
 		if (searchResult === null) {
 			throw new NotFoundException(
@@ -66,13 +65,12 @@ export class NoteService {
 			);
 		}
 
-		// Achei a nota pelo titulo... atualizo o titulo e o content da nota encontrada com o body
 		searchResult.title = note.title;
 		searchResult.content = note.content;
 
-		// Salva no bd
-		const updatedNote: NoteModel =
-			await this.noteRepository.saveNote(searchResult);
+		const updatedNote: NoteModel = await this.noteRepository.saveNote(
+			searchResult,
+		);
 
 		return updatedNote;
 	}

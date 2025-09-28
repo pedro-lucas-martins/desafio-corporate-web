@@ -6,16 +6,12 @@ import {
 	ValidationPipe,
 } from '@nestjs/common';
 import { GenericExceptionFilter, HttpExceptionFilter } from './filter';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import { swaggerConfig } from '../config';
 
 function setup(app: INestApplication) {
 	app.useGlobalPipes(
 		new ValidationPipe({
-			//TO DO
-			//whitelist: true, // So entra quem eu permitir
-			//forbidNonWhitelisted: true,
-			//forbidUnknownValues: true, // Nao escaralhar nos tipos dos valores
 			transform: true,
 			transformOptions: { enableImplicitConversion: true },
 		}),
@@ -31,6 +27,11 @@ function setupSwagger(app: INestApplication) {
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
+	app.enableCors({
+		origin: ['http://localhost:5173', 'http://localhost:3000'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+	});
 	setup(app);
 	setupSwagger(app);
 	await app.listen(process.env.PORT ?? 3000);

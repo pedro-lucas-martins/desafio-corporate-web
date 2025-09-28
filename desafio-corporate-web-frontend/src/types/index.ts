@@ -1,0 +1,83 @@
+// Tipos baseados nos DTOs do backend NestJS
+
+export interface NoteUpsertDTO {
+  title: string;
+  content: string;
+}
+
+export interface NoteReadDTO {
+  id: number;
+  title: string;
+  content: string;
+}
+
+export interface NoteTitleDTO {
+  title: string;
+}
+
+// Tipos para o estado da aplicação
+export interface AppState {
+  notes: NoteReadDTO[];
+  searchTerm: string;
+  isCreateDialogOpen: boolean;
+  isEditDialogOpen: boolean;
+  currentNote: NoteUpsertDTO;
+  editingNote: NoteReadDTO | null;
+  loading: boolean;
+  error: string;
+  success: string;
+  isOnlineMode: boolean;
+}
+
+// Tipos para as respostas da API
+export interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+  status: number;
+}
+
+// Tipos para os métodos do serviço de API
+export interface NotesApiService {
+  createNote(noteData: NoteUpsertDTO): Promise<NoteReadDTO>;
+  searchNotesByTitle(title?: string): Promise<NoteTitleDTO[]>;
+  getNoteContent(title: string): Promise<NoteReadDTO>;
+  updateNote(title: string, noteData: NoteUpsertDTO): Promise<NoteReadDTO>;
+  deleteNote(title: string): Promise<void>;
+  getAllNotes(): Promise<NoteReadDTO[]>;
+}
+
+// Tipos para eventos de formulário
+export type FormEvent = React.FormEvent<HTMLFormElement>;
+export type InputChangeEvent = React.ChangeEvent<HTMLInputElement>;
+export type TextareaChangeEvent = React.ChangeEvent<HTMLTextAreaElement>;
+export type ButtonClickEvent = React.MouseEvent<HTMLButtonElement>;
+
+// Tipos para props de componentes (se necessário no futuro)
+export interface NoteCardProps {
+  note: NoteReadDTO;
+  onEdit: (note: NoteReadDTO) => void;
+  onDelete: (title: string) => void;
+  loading?: boolean;
+}
+
+export interface DialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}
+
+// Enum para tipos de mensagem
+export enum MessageType {
+  SUCCESS = "success",
+  ERROR = "error",
+  INFO = "info",
+  WARNING = "warning",
+}
+
+// Tipo para configuração da API
+export interface ApiConfig {
+  baseURL: string;
+  timeout?: number;
+  headers?: Record<string, string>;
+}

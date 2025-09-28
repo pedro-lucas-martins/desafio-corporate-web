@@ -3,7 +3,6 @@ import { PrismaService } from '../../src/infrastructure';
 import { NoteRepository } from '../../src/repository';
 import { NoteModel } from '../../src/model';
 
-// O mock do PrismaService continua o mesmo
 const prismaServiceMock = {
 	note: {
 		findMany: jest.fn(),
@@ -46,12 +45,11 @@ describe('NoteRepository', () => {
 			const mockNotes: NoteModel[] = [
 				{ id: 1, title: 'Test', content: 'Content' },
 			];
-			// CORREÇÃO APLICADA AQUI
+
 			(prismaService.note.findMany as jest.Mock).mockResolvedValue(mockNotes);
 
 			const result = await repository.findNotesByTitle('Test');
 
-			// E AQUI
 			expect(prismaService.note.findMany).toHaveBeenCalledWith({
 				where: {
 					title: {
@@ -71,12 +69,11 @@ describe('NoteRepository', () => {
 				title: 'New Note',
 				content: 'Content',
 			};
-			// CORREÇÃO APLICADA AQUI
+
 			(prismaService.note.upsert as jest.Mock).mockResolvedValue(newNote);
 
 			const result = await repository.upsertNote(newNote);
 
-			// E AQUI
 			expect(prismaService.note.upsert).toHaveBeenCalledWith({
 				where: { title: newNote.title },
 				update: { content: newNote.content },
@@ -88,12 +85,10 @@ describe('NoteRepository', () => {
 
 	describe('removeNote', () => {
 		it('should delete a note by title', async () => {
-			// CORREÇÃO APLICADA AQUI
 			(prismaService.note.delete as jest.Mock).mockResolvedValue(undefined);
 
 			await repository.removeNote('Test');
 
-			// E AQUI
 			expect(prismaService.note.delete).toHaveBeenCalledWith({
 				where: { title: 'Test' },
 			});
@@ -107,12 +102,11 @@ describe('NoteRepository', () => {
 				title: 'Unique Note',
 				content: 'Content',
 			};
-			// CORREÇÃO APLICADA AQUI
+
 			(prismaService.note.findUnique as jest.Mock).mockResolvedValue(mockNote);
 
 			const result = await repository.findUniqueNoteByTitle('Unique Note');
 
-			// E AQUI
 			expect(prismaService.note.findUnique).toHaveBeenCalledWith({
 				where: { title: 'Unique Note' },
 			});
@@ -127,14 +121,13 @@ describe('NoteRepository', () => {
 				title: 'Note By Id',
 				content: 'Content',
 			};
-			// CORREÇÃO APLICADA AQUI
+
 			(prismaService.note.findUnique as jest.Mock).mockResolvedValue(mockNote);
 
 			const result = await repository.findUniqueNoteById({
 				id: 1,
 			} as NoteModel);
 
-			// E AQUI
 			expect(prismaService.note.findUnique).toHaveBeenCalledWith({
 				where: { id: 1 },
 			});
@@ -149,12 +142,11 @@ describe('NoteRepository', () => {
 				title: 'Updated Note',
 				content: 'New Content',
 			};
-			// CORREÇÃO APLICADA AQUI
+
 			(prismaService.note.update as jest.Mock).mockResolvedValue(mockNote);
 
 			const result = await repository.saveNote(mockNote);
 
-			// E AQUI
 			expect(prismaService.note.update).toHaveBeenCalledWith({
 				where: { id: mockNote.id },
 				data: mockNote,
