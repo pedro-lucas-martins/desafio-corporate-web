@@ -397,7 +397,7 @@ const App: React.FC = () => {
                   <p className="text-gray-600 text-sm line-clamp-4 mb-4 whitespace-pre-wrap">
                     {note.content}
                   </p>
-                  <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex justify-end gap-2 transition-opacity">
                     <Button
                       variant="ghost"
                       size="sm"
