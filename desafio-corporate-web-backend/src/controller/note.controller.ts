@@ -131,7 +131,7 @@ export class NoteController {
 		type: NoteReadDTO,
 		description: 'Não existe anotação com esse nome',
 	})
-	@ApiOkResponse({ description: 'Anotação deletada com sucesso' })
+	@ApiNotFoundResponse({ description: 'Anotação deletada com sucesso' })
 	@ApiOperation({ description: 'Deleta uma anotação no sistema' })
 	@UnexpectedResponses()
 	@HttpCode(HttpStatus.NO_CONTENT)

@@ -62,6 +62,7 @@ describe('NoteController', () => {
 			const noteModel = new NoteModel();
 			const createdNoteModel = { ...noteModel, id: 1 };
 			const expectedReadDTO: NoteReadDTO = {
+				id: 0,
 				title: 'Test Note',
 				content: 'Test Content',
 			};
@@ -105,7 +106,7 @@ describe('NoteController', () => {
 			);
 			(mapper.mapArrayAsync as jest.Mock).mockResolvedValue(expectedTitleDTOs);
 
-			const result = await controller.readNoteListByTitle(noteTitleDTO);
+			const result = await controller.readNoteListByTitle(title);
 
 			expect(noteService.searchTitleList).toHaveBeenCalledWith(title);
 			expect(mapper.mapArrayAsync).toHaveBeenCalledWith(
@@ -121,9 +122,7 @@ describe('NoteController', () => {
 			const noteTitleDTO: NoteTitleDTO = { title };
 			(noteService.searchTitleList as jest.Mock).mockResolvedValue([]);
 
-			await expect(
-				controller.readNoteListByTitle(noteTitleDTO),
-			).rejects.toThrow(
+			await expect(controller.readNoteListByTitle(title)).rejects.toThrow(
 				new HttpException(
 					'Não existem anotações correspondentes a pesquisa',
 					HttpStatus.NO_CONTENT,
@@ -144,7 +143,11 @@ describe('NoteController', () => {
 				title: title,
 				content: 'Content',
 			};
-			const expectedReadDTO: NoteReadDTO = { title: title, content: 'Content' };
+			const expectedReadDTO: NoteReadDTO = {
+				id: 0,
+				title: title,
+				content: 'Content',
+			};
 
 			(noteService.getNoteContent as jest.Mock).mockResolvedValue(
 				foundNoteModel,
@@ -187,6 +190,7 @@ describe('NoteController', () => {
 			const noteModelToUpdate = new NoteModel();
 			const updatedNoteModel = { ...noteModelToUpdate, id: 1 };
 			const expectedReadDTO: NoteReadDTO = {
+				id: 0,
 				title: 'New Title',
 				content: 'Updated Content',
 			};

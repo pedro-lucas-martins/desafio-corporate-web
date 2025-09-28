@@ -27,9 +27,23 @@ services:
     networks:
       - desafio-c-web
 
+  frontend:
+    build:
+      context: ./desafio-corporate-web-frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3001:3001"
+    depends_on:
+      - database
+      - backend
+    networks:
+      - desafio-c-web
+
 volumes:
   postgres_data:
 
 networks:
   desafio-c-web:
     driver: bridge
+
