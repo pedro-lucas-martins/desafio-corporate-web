@@ -10,6 +10,11 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { swaggerConfig } from '../config';
 
 function setup(app: INestApplication) {
+	app.enableCors({
+		origin: [process.env.FRONTEND_URL!],
+		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+	});
 	app.useGlobalPipes(
 		new ValidationPipe({
 			transform: true,
@@ -27,11 +32,6 @@ function setupSwagger(app: INestApplication) {
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
-	app.enableCors({
-		origin: ['http://localhost:5173', 'http://localhost:3000'],
-		methods: ['GET', 'POST', 'PUT', 'DELETE'],
-		allowedHeaders: ['Content-Type', 'Authorization'],
-	});
 	setup(app);
 	setupSwagger(app);
 	await app.listen(process.env.PORT ?? 3000);

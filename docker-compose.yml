@@ -1,6 +1,7 @@
 services:
   database:
     image: postgres:13
+    container_name: database
     ports:
       - "5434:5432"
     environment:
@@ -21,6 +22,7 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgres://postgres:123@database:5432/notedb
+      FRONTEND_URL: http://localhost:3001
       NODE_ENV: production
     depends_on:
       - database
@@ -33,9 +35,10 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     ports:
-      - "3001:3001"
+      - "3001:80"
+    environment:
+      VITE_NOTES_BACKEND_URL: /notesbackend
     depends_on:
-      - database
       - backend
     networks:
       - desafio-c-web
@@ -46,4 +49,3 @@ volumes:
 networks:
   desafio-c-web:
     driver: bridge
-
