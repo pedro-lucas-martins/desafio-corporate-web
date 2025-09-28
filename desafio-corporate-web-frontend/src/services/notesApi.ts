@@ -1,86 +1,36 @@
-import {
-  NoteUpsertDTO,
-  NoteReadDTO,
-  NoteTitleDTO,
-  NotesApiService as INotesApiService,
-  ApiConfig,
-} from "../types";
+import axios from "axios";
+import { NoteReadDTO, NoteUpsertDTO, NoteTitleDTO } from "../types";
 
-// Configuração base da API
-const API_CONFIG: ApiConfig = {
-  baseURL: "http://localhost:3000", // Ajuste conforme necessário
+// Cria uma instância do Axios com configurações base
+const api = axios.create({
+  baseURL: "http://localhost:3000", // Ajuste a URL base conforme necessário
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
-};
+});
 
-// Classe para gerenciar as chamadas da API
-class NotesApiService implements INotesApiService {
-  private baseURL: string;
-  private defaultHeaders: Record<string, string>;
-
-  constructor(config: ApiConfig = API_CONFIG) {
-    this.baseURL = config.baseURL;
-    this.defaultHeaders = config.headers || {};
-  }
-
-  // Método auxiliar para fazer requisições HTTP
-  private async makeRequest<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    const config: RequestInit = {
-      headers: {
-        ...this.defaultHeaders,
-        ...options.headers,
-      },
-      ...options,
-    };
-
-    try {
-      const response = await fetch(url, config);
-
-      // Se a resposta for 204 (No Content), retorna null
-      if (response.status === 204) {
-        return null as T;
-      }
-
-      // Se não for uma resposta ok, lança erro
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorData}`);
-      }
-
-      // Tenta fazer parse do JSON
-      const data: T = await response.json();
-      return data;
-    } catch (error) {
-      console.error(`Erro na requisição para ${endpoint}:`, error);
-      throw error;
-    }
-  }
-
+class NotesApiService {
   // POST /note - Criar nova anotação
   async createNote(noteData: NoteUpsertDTO): Promise<NoteReadDTO> {
-    return await this.makeRequest<NoteReadDTO>("/note", {
-      method: "POST",
-      body: JSON.stringify(noteData),
-    });
+    const response = await api.post<NoteReadDTO>("/note", noteData);
+    return response.data;
   }
 
   // GET /note?title=... - Buscar anotações por título
   async searchNotesByTitle(title: string = ""): Promise<NoteTitleDTO[]> {
-    const queryParam = title ? `?title=${encodeURIComponent(title)}` : "";
-    return await this.makeRequest<NoteTitleDTO[]>(`/note${queryParam}`);
+    const response = await api.get<NoteTitleDTO[]>("/note", {
+      params: { title },
+    });
+    return response.data;
   }
 
   // GET /note/content/:title - Buscar conteúdo completo de uma anotação
   async getNoteContent(title: string): Promise<NoteReadDTO> {
-    return await this.makeRequest<NoteReadDTO>(
+    const response = await api.get<NoteReadDTO>(
       `/note/content/${encodeURIComponent(title)}`
     );
+    return response.data;
   }
 
   // PUT /note/:title - Atualizar anotação existente
@@ -88,82 +38,39 @@ class NotesApiService implements INotesApiService {
     title: string,
     noteData: NoteUpsertDTO
   ): Promise<NoteReadDTO> {
-    return await this.makeRequest<NoteReadDTO>(
+    const response = await api.put<NoteReadDTO>(
       `/note/${encodeURIComponent(title)}`,
-      {
-        method: "PUT",
-        body: JSON.stringify(noteData),
-      }
+      noteData
     );
+    return response.data;
   }
 
   // DELETE /note/:title - Deletar anotação
   async deleteNote(title: string): Promise<void> {
-    await this.makeRequest<void>(`/note/${encodeURIComponent(title)}`, {
-      method: "DELETE",
-    });
+    // A resposta de um delete bem-sucedido não terá conteúdo, o que o Axios já lida bem.
+    await api.delete(`/note/${encodeURIComponent(title)}`);
   }
 
-  // Método para buscar todas as anotações (usando busca vazia)
+  // Método para buscar todas as anotações (composição)
   async getAllNotes(): Promise<NoteReadDTO[]> {
     try {
+      // Este método pode ser simplificado se o backend tiver uma rota para buscar tudo
       const titleResults = await this.searchNotesByTitle("");
-
-      // Se não há resultados, retorna array vazio
       if (!titleResults || titleResults.length === 0) {
         return [];
       }
-
-      // Para cada título, busca o conteúdo completo
-      const notesPromises = titleResults.map((titleDto: NoteTitleDTO) =>
+      const notesPromises = titleResults.map((titleDto) =>
         this.getNoteContent(titleDto.title)
       );
-
-      const notes = await Promise.all(notesPromises);
-      return notes;
+      return await Promise.all(notesPromises);
     } catch (error) {
-      // Se retornar 204 (No Content), significa que não há anotações
-      if (error instanceof Error && error.message.includes("204")) {
-        return [];
+      if (axios.isAxiosError(error) && error.response?.status === 204) {
+        return []; // Trata o caso de "No Content" como uma lista vazia
       }
-      throw error;
-    }
-  }
-
-  // Método para verificar conectividade com a API
-  async checkConnection(): Promise<boolean> {
-    try {
-      await this.makeRequest<NoteTitleDTO[]>("/note");
-      return true;
-    } catch (error) {
-      console.warn("API não está acessível:", error);
-      return false;
-    }
-  }
-
-  // Método para atualizar configuração da API
-  updateConfig(newConfig: Partial<ApiConfig>): void {
-    if (newConfig.baseURL) {
-      this.baseURL = newConfig.baseURL;
-    }
-    if (newConfig.headers) {
-      this.defaultHeaders = { ...this.defaultHeaders, ...newConfig.headers };
+      throw error; // Lança outros erros para serem tratados no componente
     }
   }
 }
 
-// Instância singleton do serviço
 const notesApiService = new NotesApiService();
-
 export default notesApiService;
-
-// Exporta também métodos individuais para facilitar o uso
-export const {
-  createNote,
-  searchNotesByTitle,
-  getNoteContent,
-  updateNote,
-  deleteNote,
-  getAllNotes,
-  checkConnection,
-} = notesApiService;

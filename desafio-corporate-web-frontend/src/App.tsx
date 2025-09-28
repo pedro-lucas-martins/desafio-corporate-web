@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios"; // Importe o axios para verificar o tipo de erro
 import { Button } from "@/components/ui/button.jsx";
 import { Input } from "@/components/ui/input.jsx";
 import { Textarea } from "@/components/ui/textarea.jsx";
@@ -11,6 +12,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -60,7 +62,6 @@ const App: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
-  // Função para limpar mensagens após um tempo
   const clearMessages = (): void => {
     setTimeout(() => {
       setError("");
@@ -68,38 +69,34 @@ const App: React.FC = () => {
     }, 5000);
   };
 
-  // Função para buscar todas as anotações
   const fetchNotes = async (): Promise<void> => {
     setLoading(true);
     setError("");
     try {
       const fetchedNotes = await notesApiService.getAllNotes();
       setNotes(fetchedNotes || []);
-    } catch (error) {
-      console.error("Erro ao buscar anotações:", error);
+    } catch (err) {
+      console.error("Erro ao buscar anotações:", err);
       setError(
         "Erro ao carregar anotações. Verifique se o backend está rodando."
       );
-      setNotes([]); // Limpa as anotações em caso de erro
+      setNotes([]);
       clearMessages();
     } finally {
       setLoading(false);
     }
   };
 
-  // Carregar anotações ao inicializar
   useEffect(() => {
     fetchNotes();
   }, []);
 
-  // Função para criar nova anotação
   const handleCreateNote = async (): Promise<void> => {
     if (!currentNote.title.trim() || !currentNote.content.trim()) {
       setError("Por favor, preencha título e conteúdo");
       clearMessages();
       return;
     }
-
     setLoading(true);
     setError("");
     try {
@@ -112,12 +109,9 @@ const App: React.FC = () => {
       setCurrentNote({ title: "", content: "" });
       setIsCreateDialogOpen(false);
       clearMessages();
-    } catch (error) {
-      console.error("Erro ao criar anotação:", error);
-      if (
-        error instanceof Error &&
-        (error.message.includes("409") || error.message.includes("Conflict"))
-      ) {
+    } catch (err) {
+      console.error("Erro ao criar anotação:", err);
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
         setError(
           "Já existe uma anotação com esse título. Escolha outro título."
         );
@@ -130,7 +124,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Função para atualizar anotação
   const handleUpdateNote = async (): Promise<void> => {
     if (!currentNote.title.trim() || !currentNote.content.trim()) {
       setError("Por favor, preencha título e conteúdo");
@@ -142,7 +135,6 @@ const App: React.FC = () => {
       clearMessages();
       return;
     }
-
     setLoading(true);
     setError("");
     try {
@@ -160,12 +152,9 @@ const App: React.FC = () => {
       setEditingNote(null);
       setIsEditDialogOpen(false);
       clearMessages();
-    } catch (error) {
-      console.error("Erro ao atualizar anotação:", error);
-      if (
-        error instanceof Error &&
-        (error.message.includes("404") || error.message.includes("Not Found"))
-      ) {
+    } catch (err) {
+      console.error("Erro ao atualizar anotação:", err);
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
         setError("Anotação não encontrada.");
       } else {
         setError("Erro ao atualizar anotação. Tente novamente.");
@@ -176,7 +165,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Função para deletar anotação
   const handleDeleteNote = async (noteTitle: string): Promise<void> => {
     setLoading(true);
     setError("");
@@ -185,12 +173,9 @@ const App: React.FC = () => {
       setNotes((prev) => prev.filter((note) => note.title !== noteTitle));
       setSuccess("Anotação deletada com sucesso!");
       clearMessages();
-    } catch (error) {
-      console.error("Erro ao deletar anotação:", error);
-      if (
-        error instanceof Error &&
-        (error.message.includes("404") || error.message.includes("Not Found"))
-      ) {
+    } catch (err) {
+      console.error("Erro ao deletar anotação:", err);
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
         setError("Anotação não encontrada.");
       } else {
         setError("Erro ao deletar anotação. Tente novamente.");
@@ -201,21 +186,17 @@ const App: React.FC = () => {
     }
   };
 
-  // Função para abrir dialog de edição
   const openEditDialog = async (note: NoteReadDTO): Promise<void> => {
     setEditingNote(note);
     setLoading(true);
     try {
-      // ===== CORREÇÃO APLICADA AQUI =====
-      // Voltamos a usar note.title para buscar o conteúdo, como você queria.
       const fullNote = await notesApiService.getNoteContent(note.title);
       setCurrentNote({ ...fullNote });
       setIsEditDialogOpen(true);
-    } catch (error) {
-      console.error("Erro ao buscar conteúdo da anotação:", error);
+    } catch (err) {
+      console.error("Erro ao buscar conteúdo da anotação:", err);
       setError("Erro ao carregar anotação para edição.");
       clearMessages();
-      // Fallback para os dados que já temos caso a busca falhe
       setCurrentNote({ ...note });
       setIsEditDialogOpen(true);
     } finally {
@@ -223,13 +204,11 @@ const App: React.FC = () => {
     }
   };
 
-  // Função para buscar anotações por título
   const handleSearch = async (): Promise<void> => {
     if (!searchTerm.trim()) {
-      fetchNotes(); // Se busca vazia, carrega todas
+      fetchNotes();
       return;
     }
-
     setLoading(true);
     setError("");
     try {
@@ -245,10 +224,10 @@ const App: React.FC = () => {
       } else {
         setNotes([]);
       }
-    } catch (error) {
-      console.error("Erro ao buscar anotações:", error);
-      if (error instanceof Error && error.message.includes("204")) {
-        setNotes([]); // Nenhuma anotação encontrada
+    } catch (err) {
+      console.error("Erro ao buscar anotações:", err);
+      if (axios.isAxiosError(err) && err.response?.status === 204) {
+        setNotes([]);
       } else {
         setError("Erro ao buscar anotações.");
         clearMessages();
@@ -258,7 +237,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Handlers para eventos de input
   const handleTitleChange = (e: InputChangeEvent): void => {
     setCurrentNote((prev) => ({ ...prev, title: e.target.value }));
   };
@@ -274,14 +252,12 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <header className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <StickyNote className="h-8 w-8 text-yellow-600" />
               <h1 className="text-3xl font-bold text-gray-800">Notes App</h1>
             </div>
-
             <Dialog
               open={isCreateDialogOpen}
               onOpenChange={setIsCreateDialogOpen}
@@ -302,6 +278,9 @@ const App: React.FC = () => {
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>Criar Nova Anotação</DialogTitle>
+                  <DialogDescription>
+                    Preencha os campos abaixo para criar uma nota
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <Input
@@ -340,8 +319,6 @@ const App: React.FC = () => {
               </DialogContent>
             </Dialog>
           </div>
-
-          {/* Messages */}
           {error && (
             <Alert className="mb-4 border-red-200 bg-red-50">
               <AlertCircle className="h-4 w-4 text-red-600" />
@@ -350,7 +327,6 @@ const App: React.FC = () => {
               </AlertDescription>
             </Alert>
           )}
-
           {success && (
             <Alert className="mb-4 border-green-200 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
@@ -359,8 +335,6 @@ const App: React.FC = () => {
               </AlertDescription>
             </Alert>
           )}
-
-          {/* Search Bar */}
           <div className="flex items-center gap-2 max-w-md">
             <div className="relative flex-grow">
               <Input
@@ -386,8 +360,6 @@ const App: React.FC = () => {
             </Button>
           </div>
         </header>
-
-        {/* Notes Grid */}
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="flex items-center gap-2 text-lg text-gray-600">
@@ -413,7 +385,7 @@ const App: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {notes.map((note) => (
               <Card
-                key={note.id} // É uma boa prática manter o ID aqui para a renderização do React
+                key={note.id}
                 className="bg-white hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-400 group"
               >
                 <CardHeader className="pb-3">
@@ -477,12 +449,13 @@ const App: React.FC = () => {
             ))}
           </div>
         )}
-
-        {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Editar Anotação</DialogTitle>
+              <DialogDescription>
+                Preencha os campos abaixo que deseja alterar
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <Input
@@ -508,7 +481,7 @@ const App: React.FC = () => {
                 </Button>
                 <Button
                   onClick={handleUpdateNote}
-                  className="bg-blue-500 hover:bg-blue-600"
+                  className="bg-yellow-500 hover:bg-yellow-600"
                   disabled={loading}
                 >
                   {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
