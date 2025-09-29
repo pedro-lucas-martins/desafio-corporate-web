@@ -133,33 +133,37 @@ make build
 make start
 ```
 
-_(**Nota:** Para os comandos make funcionarem, você deve estar na pasta raiz do diretório, onde o arquivo Makefile se encontra)_
+_(**Nota:** Para os comandos make funcionarem, você deve estar na pasta raiz do projeto, onde o arquivo Makefile se encontra)_
 
 **6. A aplicação estará disponível em [`http://localhost:3001`](http://localhost:3001).**
 
 ## Tecnologias Utilizadas
 
 ### **Frontend**
+
 - **[ReactJS](https://react.dev/):** Biblioteca para a construção da interface de usuário.
 - **[TailwindCSS](https://tailwindcss.com/):** Framework CSS para estilização rápida e responsiva.
 
 ### **Backend**
+
 - **[NestJS](https://nestjs.com/):** Framework Node.js para a construção de aplicações backend eficientes e escaláveis.
 - **[Prisma](https://www.prisma.io/):** ORM de última geração para interagir com o banco de dados.
 - **[TypeScript](https://www.typescriptlang.org/):** Superset do JavaScript que adiciona tipagem estática ao código.
 
 ### **Banco de Dados**
+
 - **[PostgreSQL](https://www.postgresql.org/):** Sistema de gerenciamento de banco de dados relacional.
 
 ### **Testes e Qualidade de Código**
+
 - **[Jest](https://jestjs.io/):** Framework de testes para garantir a confiabilidade e o funcionamento esperado do código.
 - **[Swagger (OpenAPI)](https://swagger.io/):** Ferramenta para documentação e teste interativo dos endpoints da API.
 
 ### **Infraestrutura e DevOps**
+
 - **[Docker](https://www.docker.com/):** Plataforma para criação e gerenciamento de contêineres.
 - **[Docker Compose](https://docs.docker.com/compose/):** Ferramenta para orquestrar múltiplos contêineres.
 - **[Makefile](https://www.gnu.org/software/make/):** Utilitário para automação de scripts e tarefas de build.
-
 
 ## Estrutura do Projeto
 
