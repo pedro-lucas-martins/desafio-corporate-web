@@ -55,12 +55,12 @@ setup:
 # ------------------------------------------------------------------------------
 build: setup
 	@echo "--- Gerando Prisma client e compilando Backend..."
-	npx prisma generate --schema $(BACKEND_DIR)/prisma/schema.prisma
+	npx --yes prisma generate --schema $(BACKEND_DIR)/prisma/schema.prisma
 	npm run prebuild --prefix $(BACKEND_DIR)
 	npm run build:nest --prefix $(BACKEND_DIR)
 
 	@echo "--- Compilando Frontend..."
-	npx cross-env $(FRONTEND_BUILD_ENV) npm run build --prefix $(FRONTEND_DIR)
+	npx --yes cross-env $(FRONTEND_BUILD_ENV) npm run build --prefix $(FRONTEND_DIR)
 	@echo "Frontend estático construído em $(FRONTEND_DIR)/dist."
 
 # ------------------------------------------------------------------------------
@@ -68,13 +68,13 @@ build: setup
 # ------------------------------------------------------------------------------
 start:
 	@echo "--- Executando migrações do Prisma (requer PostgreSQL rodando na porta $(DB_PORT))..."
-	$(BACKEND_ENV) npx prisma migrate deploy --schema $(BACKEND_DIR)/prisma/schema.prisma
+	$(BACKEND_ENV) npx --yes prisma migrate deploy --schema $(BACKEND_DIR)/prisma/schema.prisma
 
 	@echo "--- Iniciando Backend (porta $(BACKEND_HOST_PORT))..."
 	$(BACKEND_ENV) node $(BACKEND_DIR)/dist/src/main.js &
 
 	@echo "--- Iniciando Frontend com 'serve' (porta $(FRONTEND_HOST_PORT)), simulando Nginx..."
-	npx serve -s $(FRONTEND_DIR)/dist -l $(FRONTEND_HOST_PORT) &
+	npx --yes serve -s $(FRONTEND_DIR)/dist -l $(FRONTEND_HOST_PORT) &
 
 	@echo "--- Projeto iniciado. Backend em $(BACKEND_HOST_URL). Frontend em $(FRONTEND_HOST_URL)."
 
