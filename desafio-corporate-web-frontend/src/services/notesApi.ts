@@ -2,7 +2,7 @@ import axios from "axios";
 import { NoteReadDTO, NoteUpsertDTO, NoteTitleDTO } from "../types";
 
 // Define o caminho do proxy como uma constante para evitar erros de digitação.
-const BACKEND_PROXY_PATH = "/notesbackend";
+const BACKEND_PROXY_PATH = import.meta.env.VITE_NOTES_BACKEND_URL;
 
 // Cria uma instância do Axios SEM a baseURL.
 // Isso força as requisições a serem relativas ao domínio atual (localhost:3001),

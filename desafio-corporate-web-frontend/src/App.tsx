@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // Importe o axios para verificar o tipo de erro
+import axios from "axios";
 import { Button } from "@/components/ui/button.jsx";
 import { Input } from "@/components/ui/input.jsx";
 import { Textarea } from "@/components/ui/textarea.jsx";
@@ -13,6 +13,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -28,7 +29,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog.jsx";
-import { Alert, AlertDescription } from "@/components/ui/alert.jsx";
+import {
+  Alert,
+  AlertDescription as AlertDesc,
+} from "@/components/ui/alert.jsx";
 import {
   Plus,
   Edit,
@@ -53,6 +57,8 @@ const App: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState<boolean>(false);
+  const [viewingNote, setViewingNote] = useState<NoteReadDTO | null>(null);
   const [currentNote, setCurrentNote] = useState<NoteUpsertDTO>({
     title: "",
     content: "",
@@ -142,11 +148,13 @@ const App: React.FC = () => {
         title: currentNote.title.trim(),
         content: currentNote.content.trim(),
       });
-      setNotes((prev) =>
-        prev.map((note) =>
-          note.title === editingNote.title ? updatedNote : note
-        )
+      const updatedNotes = notes.map((note) =>
+        note.title === editingNote.title ? updatedNote : note
       );
+      setNotes(updatedNotes);
+      if (viewingNote?.title === editingNote.title) {
+        setViewingNote(updatedNote);
+      }
       setSuccess("Anotação atualizada com sucesso!");
       setCurrentNote({ title: "", content: "" });
       setEditingNote(null);
@@ -172,6 +180,10 @@ const App: React.FC = () => {
       await notesApiService.deleteNote(noteTitle);
       setNotes((prev) => prev.filter((note) => note.title !== noteTitle));
       setSuccess("Anotação deletada com sucesso!");
+      if (viewingNote?.title === noteTitle) {
+        setIsViewDialogOpen(false);
+        setViewingNote(null);
+      }
       clearMessages();
     } catch (err) {
       console.error("Erro ao deletar anotação:", err);
@@ -187,6 +199,7 @@ const App: React.FC = () => {
   };
 
   const openEditDialog = async (note: NoteReadDTO): Promise<void> => {
+    setIsViewDialogOpen(false);
     setEditingNote(note);
     setLoading(true);
     try {
@@ -194,11 +207,28 @@ const App: React.FC = () => {
       setCurrentNote({ ...fullNote });
       setIsEditDialogOpen(true);
     } catch (err) {
-      console.error("Erro ao buscar conteúdo da anotação:", err);
+      console.error("Erro ao buscar conteúdo da anotação para edição:", err);
       setError("Erro ao carregar anotação para edição.");
       clearMessages();
       setCurrentNote({ ...note });
       setIsEditDialogOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openViewDialog = async (note: NoteReadDTO): Promise<void> => {
+    setLoading(true);
+    try {
+      const fullNote = await notesApiService.getNoteContent(note.title);
+      setViewingNote(fullNote);
+      setIsViewDialogOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar conteúdo da anotação:", err);
+      setError("Erro ao carregar anotação para visualização.");
+      clearMessages();
+      setViewingNote(note);
+      setIsViewDialogOpen(true);
     } finally {
       setLoading(false);
     }
@@ -252,115 +282,121 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 p-4">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <header className="mb-8">
+            {/* Linha do Título (Sempre visível) */}
+            <div className="flex items-center gap-3 mb-4">
               <StickyNote className="h-8 w-8 text-yellow-600" />
               <h1 className="text-3xl font-bold text-gray-800">Notes App</h1>
             </div>
-            <Dialog
-              open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
-            >
-              <DialogTrigger asChild>
+
+            {/* Linha da Busca e Botão "Nova Anotação" */}
+            <div className="flex items-center gap-2">
+              {/* Contêiner da Barra de Busca */}
+              <div className="flex items-center gap-2 flex-grow">
+                <div className="relative flex-grow">
+                  <Input
+                    placeholder="Buscar anotações..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="bg-white shadow-sm w-full"
+                    disabled={loading}
+                  />
+                </div>
                 <Button
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg"
+                  onClick={() => handleSearch()}
+                  size="icon"
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white flex-shrink-0"
                   disabled={loading}
+                  aria-label="Pesquisar"
                 >
                   {loading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Search className="h-4 w-4" />
                   )}
-                  Nova Anotação
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Criar Nova Anotação</DialogTitle>
-                  <DialogDescription>
-                    Preencha os campos abaixo para criar uma nota
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Input
-                    placeholder="Título da anotação"
-                    value={currentNote.title}
-                    onChange={handleTitleChange}
+              </div>
+
+              {/* Botão "Nova Anotação" (Apenas para Desktop) */}
+              <div className="flex-shrink-0 hidden md:block">
+                <DialogTrigger asChild>
+                  <Button
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg"
                     disabled={loading}
-                  />
-                  <Textarea
-                    placeholder="Conteúdo da anotação"
-                    value={currentNote.content}
-                    onChange={handleContentChange}
-                    rows={6}
-                    disabled={loading}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsCreateDialogOpen(false)}
-                      disabled={loading}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleCreateNote}
-                      className="bg-yellow-500 hover:bg-yellow-600"
-                      disabled={loading}
-                    >
-                      {loading && (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      )}
-                      Criar
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-          {error && (
-            <Alert className="mb-4 border-red-200 bg-red-50">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <AlertDescription className="text-red-800">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
-          {success && (
-            <Alert className="mb-4 border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                {success}
-              </AlertDescription>
-            </Alert>
-          )}
-          <div className="flex items-center gap-2 max-w-md">
-            <div className="relative flex-grow">
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4 mr-2" />
+                    )}
+                    Nova Anotação
+                  </Button>
+                </DialogTrigger>
+              </div>
+            </div>
+
+            {/* Alertas de Erro/Sucesso */}
+            <div className="mt-4">
+              {error && (
+                <Alert className="mb-4 border-red-200 bg-red-50">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertDesc className="text-red-800">{error}</AlertDesc>
+                </Alert>
+              )}
+              {success && (
+                <Alert className="mb-4 border-green-200 bg-green-50">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDesc className="text-green-800">{success}</AlertDesc>
+                </Alert>
+              )}
+            </div>
+          </header>
+
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Criar Nova Anotação</DialogTitle>
+              <DialogDescription>
+                Preencha os campos abaixo para criar uma nova anotação.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
               <Input
-                placeholder="Buscar anotações..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="bg-white shadow-sm"
+                placeholder="Título da anotação"
+                value={currentNote.title}
+                onChange={handleTitleChange}
                 disabled={loading}
               />
+              <Textarea
+                placeholder="Conteúdo da anotação"
+                value={currentNote.content}
+                onChange={handleContentChange}
+                rows={6}
+                disabled={loading}
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                  disabled={loading}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleCreateNote}
+                  className="bg-yellow-500 hover:bg-yellow-600"
+                  disabled={loading}
+                >
+                  {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Criar
+                </Button>
+              </div>
             </div>
-            <Button
-              onClick={handleSearch}
-              size="icon"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              disabled={loading}
-              aria-label="Pesquisar"
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </header>
-        {loading ? (
+          </DialogContent>
+        </Dialog>
+
+        {/* Grid de anotações */}
+        {loading && notes.length === 0 ? (
           <div className="flex justify-center items-center h-64">
             <div className="flex items-center gap-2 text-lg text-gray-600">
               <Loader2 className="h-6 w-6 animate-spin" />
@@ -386,7 +422,8 @@ const App: React.FC = () => {
             {notes.map((note) => (
               <Card
                 key={note.id}
-                className="bg-white hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-400 group"
+                onClick={() => openViewDialog(note)}
+                className="bg-white hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-400 cursor-pointer"
               >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold text-gray-800 line-clamp-1">
@@ -397,67 +434,143 @@ const App: React.FC = () => {
                   <p className="text-gray-600 text-sm line-clamp-4 mb-4 whitespace-pre-wrap">
                     {note.content}
                   </p>
-                  <div className="flex justify-end gap-2 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditDialog(note)}
-                      className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                      disabled={loading}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                          disabled={loading}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Deletar Anotação</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza que deseja deletar a anotação "
-                            {note.title}"? Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel disabled={loading}>
-                            Cancelar
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteNote(note.title)}
-                            className="bg-red-600 hover:bg-red-700"
-                            disabled={loading}
-                          >
-                            {loading && (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            )}
-                            Deletar
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+
+        {/* Dialog de Visualização */}
+        {viewingNote && (
+          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+            <DialogContent className="sm:max-w-[600px] flex flex-col max-h-[80vh]">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">
+                  {viewingNote.title}
+                </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Conteúdo completo da anotação {viewingNote.title}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex-1 overflow-y-auto pr-4">
+                <p className="text-gray-700 whitespace-pre-wrap break-words">
+                  {viewingNote.content}
+                </p>
+              </div>
+              <DialogFooter className="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => openEditDialog(viewingNote)}
+                  disabled={loading}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" disabled={loading}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Deletar
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Deletar Anotação</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja deletar a anotação "
+                        {viewingNote.title}"? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={loading}>
+                        Cancelar
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteNote(viewingNote.title)}
+                        className="bg-red-600 hover:bg-red-700"
+                        disabled={loading}
+                      >
+                        {loading && (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        )}
+                        Deletar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Dialog de Edição */}
+        {isEditDialogOpen && (
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Editar Anotação</DialogTitle>
+                <DialogDescription>
+                  Altere os campos que desejar e clique em salvar.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <Input
+                  placeholder="Título da anotação"
+                  value={currentNote.title}
+                  onChange={handleTitleChange}
+                  disabled={loading}
+                />
+                <Textarea
+                  placeholder="Conteúdo da anotação"
+                  value={currentNote.content}
+                  onChange={handleContentChange}
+                  rows={6}
+                  disabled={loading}
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditDialogOpen(false)}
+                    disabled={loading}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleUpdateNote}
+                    className="bg-yellow-500 hover:bg-yellow-600"
+                    disabled={loading}
+                  >
+                    {loading && (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    )}
+                    Salvar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Botão Flutuante (FAB) para mobile */}
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className="bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg rounded-full fixed bottom-6 right-6 h-16 w-16 flex items-center justify-center md:hidden"
+              disabled={loading}
+              aria-label="Criar nova anotação"
+            >
+              <Plus className="h-8 w-8" />
+            </Button>
+          </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
+            {/* ... Conteúdo do dialog de criação, que já está definido no primeiro Dialog ... */}
             <DialogHeader>
-              <DialogTitle>Editar Anotação</DialogTitle>
+              <DialogTitle>Criar Nova Anotação</DialogTitle>
               <DialogDescription>
-                Preencha os campos abaixo que deseja alterar
+                Preencha os campos abaixo para criar uma nova anotação.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4">
               <Input
                 placeholder="Título da anotação"
                 value={currentNote.title}
@@ -474,18 +587,18 @@ const App: React.FC = () => {
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setIsEditDialogOpen(false)}
+                  onClick={() => setIsCreateDialogOpen(false)}
                   disabled={loading}
                 >
                   Cancelar
                 </Button>
                 <Button
-                  onClick={handleUpdateNote}
+                  onClick={handleCreateNote}
                   className="bg-yellow-500 hover:bg-yellow-600"
                   disabled={loading}
                 >
                   {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Salvar
+                  Criar
                 </Button>
               </div>
             </div>
