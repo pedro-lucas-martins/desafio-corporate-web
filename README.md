@@ -92,18 +92,18 @@ cd seu-repo
 
 ```bash
 # Para o frontend
-cp desafio-corporate-web-frontend/env.example .env
+cp desafio-corporate-web-frontend/ .env.example .env
 # Para o backend
-cp desafio-corporate-web-backend .env.example .env
+cp desafio-corporate-web-backend/ .env.example .env
 ```
 
 - Windows
 
 ```powershell
 # Para o frontend
-copy desafio-corporate-web-frontend/env.example .env
+copy desafio-corporate-web-frontend/ .env.example .env
 # Para o backend
-copy desafio-corporate-web-backend .env.example .env
+copy desafio-corporate-web-backend/ .env.example .env
 ```
 
 4. Rode o container
@@ -152,9 +152,9 @@ cd seu-repo
 
 ```powershell
 # Para o frontend
-copy desafio-corporate-web-frontend/env.example .env
+copy desafio-corporate-web-frontend/ .env.example .env
 # Para o backend
-copy desafio-corporate-web-backend .env.example .env
+copy desafio-corporate-web-backend/ .env.example .env
 ```
 
 4. Faça o build do projeto
