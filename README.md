@@ -206,7 +206,7 @@ desafio-corporate-web-frontend/
 
 A aplicação é organizada em uma arquitetura de **três camadas**, containerizada via **Docker** e gerenciada via **Docker Compose**:
 
-![Arch](./docs/demo/architecture.png)
+![Arch](./docs/demo/archi.png)
 
 ## Desenvolvedor
 
