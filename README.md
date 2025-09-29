@@ -163,7 +163,7 @@ _(**Nota:** Para os comandos make funcionarem, você deve estar na pasta raiz do
 
 - **[Docker](https://www.docker.com/)**
 - **[Docker Compose](https://docs.docker.com/compose/)**
-- **[Makefile](https://www.gnu.org/software/make/)**
+- **[Makefile](<https://en.wikipedia.org/wiki/Make_(software)>)**
 
 ## Estrutura do Projeto
 
