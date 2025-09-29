@@ -8,7 +8,7 @@
 
 ## Índice
 
-- [ Instalação e uso](#instalação-e-uso)
+- [ Instalação e execução](#instalação-e-execução)
 - [ Tecnologias Utilizadas](#tecnologias-utilizadas)
 - [ Estrutura do Projeto](#estrutura-do-projeto)
 - [ Arquitetura do Sistema](#arquitetura-do-sistema)
