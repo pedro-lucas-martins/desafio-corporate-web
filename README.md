@@ -22,9 +22,9 @@
 - [✨ Funcionalidades](#-funcionalidades)
 - [🖥️ Demonstração](#️-demonstração)
 - [📂 Instalação e uso](#-instalação-e-uso)
-- [⚙️ Tecnologias Utilizadas](#-tecnologias-utilizadas)
+- [⚙️ Tecnologias Utilizadas](#️-tecnologias-utilizadas)
 - [📂 Estrutura do Projeto](#-estrutura-do-projeto)
-- [🏗️ Arquitetura do Sistema](#-arquitetura-do-sistema)
+- [🏗️ Arquitetura do Sistema](#️-arquitetura-do-sistema)
 - [👨‍💻 Desenvolvedores](#-desenvolvedores)
 
 ---
