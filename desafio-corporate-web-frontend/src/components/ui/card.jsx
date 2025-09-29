@@ -58,7 +58,7 @@ const CardFooter = React.forwardRef(({ className, ...props }, ref) => (
 ));
 CardFooter.displayName = "CardFooter";
 
-// O componente CardAction não estava no seu export, mas adicionei a correção caso você o use.
+
 const CardAction = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}

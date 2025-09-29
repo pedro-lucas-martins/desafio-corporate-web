@@ -93,9 +93,16 @@ const App: React.FC = () => {
     }
   };
 
+
   useEffect(() => {
     fetchNotes();
   }, []);
+
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      fetchNotes();
+    }
+  }, [searchTerm]);
 
   const handleCreateNote = async (): Promise<void> => {
     if (!currentNote.title.trim() || !currentNote.content.trim()) {
@@ -236,7 +243,6 @@ const App: React.FC = () => {
 
   const handleSearch = async (): Promise<void> => {
     if (!searchTerm.trim()) {
-      fetchNotes();
       return;
     }
     setLoading(true);
@@ -284,15 +290,13 @@ const App: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <header className="mb-8">
-            {/* Linha do Título (Sempre visível) */}
             <div className="flex items-center gap-3 mb-4">
               <StickyNote className="h-8 w-8 text-yellow-600" />
               <h1 className="text-3xl font-bold text-gray-800">Notes App</h1>
             </div>
 
-            {/* Linha da Busca e Botão "Nova Anotação" */}
+
             <div className="flex items-center gap-2">
-              {/* Contêiner da Barra de Busca */}
               <div className="flex items-center gap-2 flex-grow">
                 <div className="relative flex-grow">
                   <Input
@@ -318,7 +322,6 @@ const App: React.FC = () => {
                 </Button>
               </div>
 
-              {/* Botão "Nova Anotação" (Apenas para Desktop) */}
               <div className="flex-shrink-0 hidden md:block">
                 <DialogTrigger asChild>
                   <Button
@@ -335,8 +338,6 @@ const App: React.FC = () => {
                 </DialogTrigger>
               </div>
             </div>
-
-            {/* Alertas de Erro/Sucesso */}
             <div className="mt-4">
               {error && (
                 <Alert className="mb-4 border-red-200 bg-red-50">
@@ -395,7 +396,6 @@ const App: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Grid de anotações */}
         {loading && notes.length === 0 ? (
           <div className="flex justify-center items-center h-64">
             <div className="flex items-center gap-2 text-lg text-gray-600">
@@ -440,7 +440,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Dialog de Visualização */}
         {viewingNote && (
           <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
             <DialogContent className="sm:max-w-[600px] flex flex-col max-h-[80vh]">
@@ -503,7 +502,6 @@ const App: React.FC = () => {
           </Dialog>
         )}
 
-        {/* Dialog de Edição */}
         {isEditDialogOpen && (
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogContent className="sm:max-w-[500px]">
@@ -551,7 +549,6 @@ const App: React.FC = () => {
           </Dialog>
         )}
 
-        {/* Botão Flutuante (FAB) para mobile */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button
@@ -563,7 +560,6 @@ const App: React.FC = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
-            {/* ... Conteúdo do dialog de criação, que já está definido no primeiro Dialog ... */}
             <DialogHeader>
               <DialogTitle>Criar Nova Anotação</DialogTitle>
               <DialogDescription>

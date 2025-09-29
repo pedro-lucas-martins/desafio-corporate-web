@@ -1,12 +1,8 @@
 import axios from "axios";
 import { NoteReadDTO, NoteUpsertDTO, NoteTitleDTO } from "../types";
 
-// Define o caminho do proxy como uma constante para evitar erros de digitação.
 const BACKEND_PROXY_PATH = import.meta.env.VITE_NOTES_BACKEND_URL;
 
-// Cria uma instância do Axios SEM a baseURL.
-// Isso força as requisições a serem relativas ao domínio atual (localhost:3001),
-// o que garante que elas passarão pelo nosso proxy Nginx.
 const api = axios.create({
   timeout: 10000,
   headers: {
@@ -15,7 +11,6 @@ const api = axios.create({
 });
 
 class NotesApiService {
-  // POST /notesbackend/note - Criar nova anotação
   async createNote(noteData: NoteUpsertDTO): Promise<NoteReadDTO> {
     const response = await api.post<NoteReadDTO>(
       `${BACKEND_PROXY_PATH}/note`,
@@ -24,7 +19,6 @@ class NotesApiService {
     return response.data;
   }
 
-  // GET /notesbackend/note?title=... - Buscar anotações por título
   async searchNotesByTitle(title: string = ""): Promise<NoteTitleDTO[]> {
     const response = await api.get<NoteTitleDTO[]>(
       `${BACKEND_PROXY_PATH}/note`,
@@ -35,7 +29,6 @@ class NotesApiService {
     return response.data;
   }
 
-  // GET /notesbackend/note/content/:title - Buscar conteúdo completo de uma anotação
   async getNoteContent(title: string): Promise<NoteReadDTO> {
     const response = await api.get<NoteReadDTO>(
       `${BACKEND_PROXY_PATH}/note/content/${encodeURIComponent(title)}`
@@ -43,7 +36,6 @@ class NotesApiService {
     return response.data;
   }
 
-  // PUT /notesbackend/note/:title - Atualizar anotação existente
   async updateNote(
     title: string,
     noteData: NoteUpsertDTO
@@ -55,12 +47,10 @@ class NotesApiService {
     return response.data;
   }
 
-  // DELETE /notesbackend/note/:title - Deletar anotação
   async deleteNote(title: string): Promise<void> {
     await api.delete(`${BACKEND_PROXY_PATH}/note/${encodeURIComponent(title)}`);
   }
 
-  // Método para buscar todas as anotações (composição)
   async getAllNotes(): Promise<NoteReadDTO[]> {
     try {
       const titleResults = await this.searchNotesByTitle("");
