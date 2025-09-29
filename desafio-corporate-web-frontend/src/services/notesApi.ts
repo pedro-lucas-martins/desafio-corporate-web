@@ -1,7 +1,7 @@
 import axios from "axios";
 import { NoteReadDTO, NoteUpsertDTO, NoteTitleDTO } from "../types";
 
-const BACKEND_PROXY_PATH = import.meta.env.VITE_NOTES_BACKEND_URL;
+const BACKEND_PROXY_PATH = "/notesbackend";
 
 const api = axios.create({
   timeout: 10000,
