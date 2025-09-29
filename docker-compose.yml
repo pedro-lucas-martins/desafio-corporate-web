@@ -36,8 +36,6 @@ services:
     container_name: frontend
     ports:
       - "3001:80"
-    environment:
-      VITE_NOTES_BACKEND_URL: /notesbackend
     depends_on:
       - backend
     networks:

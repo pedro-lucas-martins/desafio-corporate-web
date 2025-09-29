@@ -83,16 +83,12 @@ const App: React.FC = () => {
       setNotes(fetchedNotes || []);
     } catch (err) {
       console.error("Erro ao buscar anotações:", err);
-      setError(
-        "Erro ao carregar anotações. Verifique se o backend está rodando."
-      );
       setNotes([]);
       clearMessages();
     } finally {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     fetchNotes();
@@ -294,7 +290,6 @@ const App: React.FC = () => {
               <StickyNote className="h-8 w-8 text-yellow-600" />
               <h1 className="text-3xl font-bold text-gray-800">Notes App</h1>
             </div>
-
 
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 flex-grow">
