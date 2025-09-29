@@ -37,7 +37,7 @@ Existem duas maneiras de executar este projeto: utilizando Docker (recomendado) 
 Antes de começar, certifique-se de ter as seguintes ferramentas instaladas:
 
 - [Git](https://git-scm.com/)
-- [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/) (para a execução via container)
+- [Docker](https://docs.docker.com/desktop/setup/install/windows-install/) e [Docker Compose](https://docs.docker.com/compose/install/linux/) (para a execução via container)
 
 <br>
 
@@ -74,12 +74,6 @@ _(**Nota:** O argumento `-d` executa os containers em modo "detached", liberando
 - **API (Backend):** [`http://localhost:3000`](http://localhost:3000)
 - **Documentação da API (Swagger):** [`http://localhost:3000/api`](http://localhost:3000/api)
 - **String de Conexão do Banco de dados:** `postgres://postgres:123@database:5434/notedb`
-
-**Para parar a execução dos containers, utilize o comando:**
-
-```bash
-docker-compose down
-```
 
 <br>
 

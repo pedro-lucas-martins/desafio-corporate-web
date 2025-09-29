@@ -37,7 +37,6 @@ help:
 	@echo " setup:     Instala todas as dependencias do backend e frontend."
 	@echo " build:     (Depende de setup) Compila o backend (NestJS) e o frontend (React)."
 	@echo " start:     Inicia o backend (porta 3000) e o frontend (porta 3001)."
-	@echo " stop:      Mata os processos do Node.js (rudimentar, apenas para desenvolvimento)."
 	@echo " clean:     Limpa os diretórios de build (dist) e node_modules."
 	@echo "========================================================"
 	@echo "IMPORTANTE: Este modo requer que Node.js, PostgreSQL e o pacote 'serve' (para frontend)"
@@ -81,16 +80,7 @@ start:
 	@echo "--- Projeto iniciado. Backend em $(BACKEND_HOST_URL). Frontend em $(FRONTEND_HOST_URL)."
 
 # ------------------------------------------------------------------------------
-# 4. STOP: Para os serviços (rudimentar)
-# ------------------------------------------------------------------------------
-stop:
-	@echo "--- Tentando parar processos Node.js e Serve..."
-	pkill -f "node $(BACKEND_DIR)/dist/src/main.js" || true
-	pkill -f "serve -s $(FRONTEND_DIR)/dist" || true
-	@echo "Processos parados (pode exigir verificação manual)."
-
-# ------------------------------------------------------------------------------
-# 5. CLEAN: Limpeza de build e módulos
+# 4. CLEAN: Limpeza de build e módulos
 # ------------------------------------------------------------------------------
 clean:
 	@echo "--- Removendo diretorios de build e modulos..."
