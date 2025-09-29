@@ -141,29 +141,29 @@ _(**Nota:** Para os comandos make funcionarem, você deve estar na pasta raiz do
 
 ### **Frontend**
 
-- **[ReactJS](https://react.dev/):**
-- **[TailwindCSS](https://tailwindcss.com/):**
+- **[ReactJS](https://react.dev/)**
+- **[TailwindCSS](https://tailwindcss.com/)**
 
 ### **Backend**
 
-- **[NestJS](https://nestjs.com/):**
-- **[Prisma](https://www.prisma.io/):**
-- **[TypeScript](https://www.typescriptlang.org/):**
+- **[NestJS](https://nestjs.com/)**
+- **[Prisma](https://www.prisma.io/)**
+- **[TypeScript](https://www.typescriptlang.org/)**
 
 ### **Banco de Dados**
 
-- **[PostgreSQL](https://www.postgresql.org/):**
+- **[PostgreSQL](https://www.postgresql.org/)**
 
 ### **Testes e Qualidade de Código**
 
-- **[Jest](https://jestjs.io/):**
-- **[Swagger (OpenAPI)](https://swagger.io/):**
+- **[Jest](https://jestjs.io/)**
+- **[Swagger (OpenAPI)](https://swagger.io/)**
 
 ### **Infraestrutura e DevOps**
 
-- **[Docker](https://www.docker.com/):** Plataforma para criação e gerenciamento de contêineres.
-- **[Docker Compose](https://docs.docker.com/compose/):** Ferramenta para orquestrar múltiplos contêineres.
-- **[Makefile](https://www.gnu.org/software/make/):** Utilitário para automação de scripts e tarefas de build.
+- **[Docker](https://www.docker.com/)**
+- **[Docker Compose](https://docs.docker.com/compose/)**
+- **[Makefile](https://www.gnu.org/software/make/)**
 
 ## Estrutura do Projeto
 
