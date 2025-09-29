@@ -184,7 +184,7 @@ desafio-corporate-web-backend/
 │    ├── model/                  # Definição dos modelos/entidades de domínio
 │    ├── repository/             # Camada de repositório para abstrair o acesso aos dados
 │    └── service/                # Camada de serviço, onde reside a lógica de negócio
-├── test/                        # Testes automatizados (unitários e e2e)
+├── test/                        # Testes automatizados (unitários)
 ├── Dockerfile                   # Dockerfile para containerização do backend
 └── ...                          # Outros arquivos de configuração (package.json, tsconfig.json, etc.)
 ```
@@ -203,7 +203,7 @@ desafio-corporate-web-frontend/
 │    └── types/                  # Definições de tipos e interfaces TypeScript
 ├── nginx.conf                   # Configuração do Nginx para servir a aplicação em produção
 ├── Dockerfile                   # Dockerfile para containerização do frontend
-└── ...                          # Outros arquivos de configuração (tailwind, postcss, etc.)
+└── ...                          # Outros arquivos de configuração (package.json, tailwind, etc.)
 ```
 
 ## Arquitetura do Sistema
@@ -231,7 +231,7 @@ A aplicação é organizada em uma arquitetura de **três camadas**, containeriz
         </td>
         <td align="center">
             <p>Pedro Lucas –
-                <a href="contato.plmartins@gmail.com">
+                <a href="mailto:contato.plmartins@gmail.com">
                     contato.plmartins@gmail.com
                 </a>
             </p>
