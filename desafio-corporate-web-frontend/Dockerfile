@@ -12,7 +12,7 @@ COPY package.json package-lock.json* ./
 
 # Instala todas as dependências (incluindo devDependencies) necessárias para o build.
 # O Docker armazena essa camada em cache. Ele só a executará novamente se os arquivos de manifesto mudarem.
-RUN npm install
+RUN npm ci
 
 # Copia todo o código-fonte restante da sua aplicação.
 COPY . .

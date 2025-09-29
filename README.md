@@ -63,7 +63,7 @@ cd desafio-corporate-web
 Este comando irá construir as imagens (se necessário) e iniciar os serviços da aplicação e do banco de dados em segundo plano.
 
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 ```
 
 _(**Nota:** O argumento `-d` executa os containers em modo "detached", liberando seu terminal.)_
@@ -85,8 +85,8 @@ Este método requer a instalação e configuração manual de todas as dependên
 
 **1. Instale as dependências (Windows):**
 
-- **PostgreSQL:** [Link para download](https://www.postgresql.org/download/windows/)
-- **Node.js:** [Link para download](https://nodejs.org/en/download) (v20.19.5 LTS ou superior)
+- [PostgreSQL](https://www.postgresql.org/download/windows/)
+- [Node.js](https://nodejs.org/en/download) (v20.19.5 LTS ou superior)
 - **Utilitários de Build (Make):** Recomendamos usar um gerenciador de pacotes como o [Chocolatey](https://chocolatey.org/install) para instalar o `make`.
   ```powershell
   # Instala o Chocolatey (siga as instruções no site oficial)

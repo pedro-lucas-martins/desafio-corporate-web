@@ -11,7 +11,12 @@ import { swaggerConfig } from '../config';
 
 function setup(app: INestApplication) {
 	app.enableCors({
-		origin: [process.env.FRONTEND_URL!],
+		origin: [
+			process.env.FRONTEND_URL!,
+			"http://localhost",
+			"http://localhost:3001",
+			"http://frontend",
+			"http://frontend:80"],
 		methods: ['GET', 'POST', 'PUT', 'DELETE'],
 		allowedHeaders: ['Content-Type', 'Authorization'],
 	});
