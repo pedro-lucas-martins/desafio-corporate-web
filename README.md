@@ -30,8 +30,6 @@
 
 ## Instalação e Execução
 
-Existem duas maneiras de executar este projeto: utilizando Docker (recomendado) ou configurando o ambiente localmente usando Windows Powershell.
-
 ### Pré-requisitos
 
 Antes de começar, certifique-se de ter as seguintes ferramentas instaladas:
@@ -43,7 +41,7 @@ Antes de começar, certifique-se de ter as seguintes ferramentas instaladas:
 
 ---
 
-### **Opção 1: Executando com Docker (Recomendado)**
+### **Executando com Docker** 
 
 Este é o método mais simples e rápido para colocar a aplicação no ar, pois ele gerencia todas as dependências e configurações automaticamente.
 
@@ -77,60 +75,6 @@ _(**Nota:** O argumento `-d` executa os containers em modo "detached", liberando
 
 <br>
 
----
-
-### **Opção 2: Executando Localmente com Makefile (Ambiente Manual)**
-
-Este método requer a instalação e configuração manual de todas as dependências via Windows usando powershell na sua máquina.
-
-**1. Instale as dependências (Windows):**
-
-- [PostgreSQL](https://www.postgresql.org/download/windows/)
-- [Node.js](https://nodejs.org/en/download) (v20.19.5 LTS ou superior)
-- **Utilitários de Build (Make):** Recomendamos usar um gerenciador de pacotes como o [Chocolatey](https://chocolatey.org/install) para instalar o `make`.
-  ```powershell
-  # Instala o Chocolatey (siga as instruções no site oficial)
-  # Depois, instale o make:
-  choco install make
-  ```
-
-**2. Clone o repositório e acesse o diretório:**
-
-```bash
-git clone https://github.com/pedro-lucas-martins/desafio-corporate-web.git
-```
-
-```bash
-cd desafio-corporate-web
-```
-
-**3. Abra o arquivo Makefile e altere as seguintes variáveis de acordo com o seu PostgreSQL:**
-
-```ini
-# Configuração do Banco de Dados
-DB_USER=seu_usuario
-DB_PASSWORD=sua_senha
-DB_HOST=localhost
-DB_PORT=5432
-```
-
-**4. Instale as dependências do projeto e construa a aplicação:**
-Este comando irá instalar os pacotes npm para o frontend e backend.
-
-```bash
-make build
-```
-
-**5. Inicie a aplicação:**
-
-```bash
-make start
-```
-
-_(**Nota:** Para os comandos make funcionarem, você deve estar na pasta raiz do projeto, onde o arquivo Makefile se encontra)_
-
-**6. A aplicação estará disponível em [`http://localhost:3001`](http://localhost:3001).**
-
 ## Tecnologias Utilizadas
 
 ### **Frontend**
@@ -157,7 +101,6 @@ _(**Nota:** Para os comandos make funcionarem, você deve estar na pasta raiz do
 
 - **[Docker](https://www.docker.com/)**
 - **[Docker Compose](https://docs.docker.com/compose/)**
-- **[Makefile](<https://en.wikipedia.org/wiki/Make_(software)>)**
 
 ## Estrutura do Projeto
 
