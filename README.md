@@ -41,7 +41,7 @@ Antes de começar, certifique-se de ter as seguintes ferramentas instaladas:
 
 ---
 
-### **Executando com Docker** 
+### **Executando com Docker**
 
 Este é o método mais simples e rápido para colocar a aplicação no ar, pois ele gerencia todas as dependências e configurações automaticamente.
 
@@ -64,6 +64,7 @@ Este comando irá construir as imagens (se necessário) e iniciar os serviços d
 docker compose up --build -d
 ```
 
+_(**Nota:** Se seu docker nao estiver configurado para rodar sem sudo, adicione sudo no inicio do comando.)_
 _(**Nota:** O argumento `-d` executa os containers em modo "detached", liberando seu terminal.)_
 
 **4. Pronto! A aplicação está disponível nos seguintes endereços:**
