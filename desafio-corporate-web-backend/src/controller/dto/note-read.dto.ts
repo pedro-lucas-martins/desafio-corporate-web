@@ -19,10 +19,10 @@ export class NoteReadDTO {
 		required: true,
 		type: String,
 		minimum: 1,
-		maximum: 80,
+		maximum: 30,
 	})
 	@AutoMap()
-	@MaxLength(80)
+	@MaxLength(30)
 	@IsNotEmpty()
 	public title: string;
 

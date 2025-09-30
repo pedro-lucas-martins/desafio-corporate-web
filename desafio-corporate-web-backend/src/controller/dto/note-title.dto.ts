@@ -9,10 +9,10 @@ export class NoteTitleDTO {
 		required: true,
 		type: String,
 		minimum: 1,
-		maximum: 80
+		maximum: 30
 	})
 	@AutoMap()
-	@MaxLength(80)
+	@MaxLength(30)
 	@IsNotEmpty()
 	@IsString()
 	@Type(() => String)

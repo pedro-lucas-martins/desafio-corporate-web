@@ -8,11 +8,11 @@ export class NoteUpsertDTO {
 		required: true,
 		type: String,
 		minimum: 1,
-		maximum: 80,
+		maximum: 30,
 	})
 	@AutoMap()
 	@IsNotEmpty()
-	@MaxLength(80)
+	@MaxLength(30)
 	public title: string;
 
 	@ApiProperty({
